@@ -11,13 +11,14 @@ jobs:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
       - name: Get service from ref
         run: |
+          echo "왜 안나오지"
           echo "${{ github.ref }}"
           MODULE=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-          echo ${MODULE}
+          echo $MODULE
 
-      - uses: actions/checkout@v2
       - name: Build image
         run: docker build . -f Dockerfile --tag ${IMAGE_NAME}
 
