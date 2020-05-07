@@ -2,25 +2,32 @@ name: Getting Started Github Actions
 
 on: push
 env:
-  GITHUB_SHA: ${{ github.sha }}
   IMAGE_NAME: hello
   REGISTRY_HOSTNAME: docker.pkg.github.com
+  GITHUB_SHA: ${{ github.sha }}
+  GITHUB_REPOSITORY: ${{ github.repository }}
 jobs:
   setup-build-publish-deploy:
     name: Setup, Build, Publish, and Deploy
     runs-on: ubuntu-latest
     steps:
+      - name: Get service from ref
+        run: |
+          echo "${{ github.ref }}"
+          MODULE=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
+          echo ${MODULE}
+
       - uses: actions/checkout@v2
       - name: Build image
-        run: docker build . -f Dockerfile --tag hello
+        run: docker build . -f Dockerfile --tag ${IMAGE_NAME}
 
       - name: Log into registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${REGISTRY_HOSTNAME} -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          docker tag hello docker.pkg.github.com/dezang/gs-github-actions/hello:${{ github.sha }}
-          docker push docker.pkg.github.com/dezang/gs-github-actions/hello:${{ github.sha }}
+          docker tag ${IMAGE_NAME} ${REGISTRY_HOSTNAME}/${GITHUB_REPOSITORY}/${IMAGE_NAME}:${GITHUB_SHA}
+          docker push ${REGISTRY_HOSTNAME}/${GITHUB_REPOSITORY}/${IMAGE_NAME}:${GITHUB_SHA}
 
   dump:
     runs-on: ubuntu-16.04
