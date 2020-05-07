@@ -12,18 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Build image
-        run: docker build . -f Dockerfile --tag $IMAGE_NAME
+        run: docker build . -f Dockerfile --tag hello
 
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login docker.pkg.github.com -u ${{ github.actor }} --password-stdin
 
       - name: Push image
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
-          echo IMAGE_ID=$IMAGE_ID
-          docker tag $IMAGE_NAME $IMAGE_ID:$GITHUB_SHA
-          docker images
-          docker push $IMAGE_ID:$GITHUB_SHA
+          docker tag hello docker.pkg.github.com/dezang/gs-github-actions/hello:${{ github.sha }}
+          docker push docker.pkg.github.com/dezang/gs-github-actions/hello:${{ github.sha }}
 
   dump:
     runs-on: ubuntu-16.04
